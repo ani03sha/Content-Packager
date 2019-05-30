@@ -1,16 +1,16 @@
 package org.redquark.aem.contentpackager.core.services.impl;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+import javax.jcr.ItemExistsException;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
-import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
-import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
-import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.jackrabbit.vault.packaging.*;
 import org.apache.jackrabbit.vault.util.DefaultProgressListener;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -36,15 +36,12 @@ public class PackagerServiceImpl implements PackagerService {
 	@Reference
 	private Packaging packaging;
 
-	// JCR Session
-	private Session session;
-
 	/**
 	 * This method creates a package in the JCR using specified group, name and
 	 * content filter paths
 	 */
 	@Override
-	public boolean createPackage(String packageName, String groupName, List<ContentFilters> contentFilters,
+	public String createPackage(String packageName, String groupName, List<ContentFilters> contentFilters,
 			SlingHttpServletRequest request) {
 
 		try {
@@ -69,7 +66,7 @@ public class PackagerServiceImpl implements PackagerService {
 			ResourceResolver resolver = request.getResourceResolver();
 
 			// Getting the JCR session by adapting the ResourceResolver
-			session = resolver.adaptTo(Session.class);
+			Session session = resolver.adaptTo(Session.class);
 
 			// Getting the instance of the AEM's JCR package manager
 			final JcrPackageManager jcrPackageManager = packaging.getPackageManager(session);
@@ -97,11 +94,20 @@ public class PackagerServiceImpl implements PackagerService {
 			// Creating a new package in the AEM's package manager
 			jcrPackageManager.assemble(jcrPackage, new DefaultProgressListener(out));
 
-			return true;
+			return null;
 
-		} catch (Exception e) {
+		} catch (ItemExistsException e) {
 			log.error(e.getMessage(), e);
-			return false;
+			return "Package with this name already exist, " + e.getMessage();
+		} catch (IOException e) {
+			log.error(e.getMessage(), e);
+			return "Error while reading or writing package to system";
+		} catch (RepositoryException e) {
+			log.error(e.getMessage(), e);
+			return "Error while reading or writing package to content repository";
+		} catch (PackageException e) {
+			log.error(e.getMessage(), e);
+			return "Error while creating the package";
 		}
 	}
 }

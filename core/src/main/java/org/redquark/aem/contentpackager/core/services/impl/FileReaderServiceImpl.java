@@ -26,15 +26,11 @@ public class FileReaderServiceImpl implements FileReaderService {
 	// Logger
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	private List<ContentFilters> filters;
-
 	@Override
 	public List<ContentFilters> readData(String filePath) {
 
+		List<ContentFilters> filters = new LinkedList<>();
 		try {
-
-			// Instantiating the ContentFilters' list
-			filters = new LinkedList<>();
 
 			// Creating a workbook from the excel file (.xls or .xlsx)
 			Workbook workbook = WorkbookFactory.create(new File(filePath));

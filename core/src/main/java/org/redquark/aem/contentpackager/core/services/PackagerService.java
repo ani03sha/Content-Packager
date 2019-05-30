@@ -15,8 +15,8 @@ public interface PackagerService {
 	 * This method creates the package in the AEM's package manager and returns true
 	 * if successful
 	 * 
-	 * @return {@link Boolean}
+	 * @return {@link String}
 	 */
-	boolean createPackage(String packageName, String groupName, List<ContentFilters> contentFilters,
+	String createPackage(String packageName, String groupName, List<ContentFilters> contentFilters,
 			SlingHttpServletRequest request);
 }

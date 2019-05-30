@@ -1,6 +1,7 @@
 package org.redquark.aem.contentpackager.core.servlets;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.List;
@@ -123,17 +124,17 @@ public class HandleContentPackageServlet extends SlingAllMethodsServlet {
 				file.delete();
 
 				// Calling the PackagerService to create package in AEM Package Manager
-				boolean isSuccessful = packagerService.createPackage(packageName, groupName, filters, request);
+				String error = packagerService.createPackage(packageName, groupName, filters, request);
 
-				if (isSuccessful) {
+				if (null == error) {
 					log.info("Package has been created successfully");
 					printWriter.println("Package has been created successfully");
 				} else {
-					printWriter.println("Some error occurred. Check the logs.");
+					printWriter.println("Error occurred:" + error);
 				}
 
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			log.error(e.getMessage(), e);
 		}
 	}
